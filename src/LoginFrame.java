@@ -10,71 +10,90 @@ public class LoginFrame extends JFrame implements ActionListener {
     private final JPasswordField txtDBPassword;
 
     public LoginFrame() {
-        this.setTitle("Information System");
+        this.setTitle("DataBase Basic Project");
         this.setSize(500, 400);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLayout(new BorderLayout(20, 20));
 
-        Font font = new Font("Malgun Gothic", Font.PLAIN, 18);
+        Font font1 = new Font("Malgun Gothic", Font.BOLD, 18);
+        Font font2 = new Font("Malgun Gothic", Font.PLAIN, 18);
 
+        // Login Panel1
+        JPanel loginPanel1 = new JPanel();
+        loginPanel1.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
+
+        // title 명시
         JLabel lblTitle = new JLabel("Database Login");
         lblTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
 
-        JLabel lblDBAccount = new JLabel("DB Account");
-        lblDBAccount.setFont(font);
-        txtDBAccount = new JTextField(15);
-        txtDBAccount.setFont(font);
+        loginPanel1.add(lblTitle);
 
-        JLabel lblDBPassword = new JLabel("DB Password");
-        lblDBPassword.setFont(font);
-        txtDBPassword = new JPasswordField(15);
-        txtDBPassword.setFont(font);
+        this.add(loginPanel1, BorderLayout.NORTH);
 
-        JLabel lblDBName = new JLabel("DB Name");
-        lblDBName.setFont(font);
-        txtDBName = new JTextField(15);
-        txtDBName.setFont(font);
 
-        JButton btnLogin = new JButton("OK");
-        btnLogin.setFont(new Font("Malgun Gothic", Font.BOLD, 18));
-        btnLogin.addActionListener(this);
+        // Login Panel2
+        JPanel loginPanel2 = new JPanel();
+        loginPanel2.setLayout(new GridBagLayout());
 
-        JPanel p1 = new JPanel();
-        p1.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
-        p1.add(lblTitle);
+        // DB 계정
+        JLabel lblDBAccount = new JLabel("DB Account: ");
+        lblDBAccount.setFont(font1);
+        this.txtDBAccount = new JTextField(15);
+        txtDBAccount.setFont(font2);
 
-        JPanel p2 = new JPanel();
-        p2.setLayout(new GridBagLayout());
+        // DB 비밀번호
+        JLabel lblDBPassword = new JLabel("DB Password: ");
+        lblDBPassword.setFont(font1);
+        this.txtDBPassword = new JPasswordField(15);
+        txtDBPassword.setFont(font2);
+
+        // DB 이름 (mydb)
+        JLabel lblDBName = new JLabel("DB Name: ");
+        lblDBName.setFont(font1);
+        this.txtDBName = new JTextField(15);
+        txtDBName.setFont(font2);
+
+        // 간격 조정
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        p2.add(lblDBAccount, gbc);
+        loginPanel2.add(lblDBAccount, gbc);
         gbc.gridx = 1;
-        p2.add(txtDBAccount, gbc);
+        loginPanel2.add(txtDBAccount, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 1;
-        p2.add(lblDBPassword, gbc);
+        loginPanel2.add(lblDBPassword, gbc);
         gbc.gridx = 1;
-        p2.add(txtDBPassword, gbc);
+        loginPanel2.add(txtDBPassword, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = 2;
-        p2.add(lblDBName, gbc);
+        loginPanel2.add(lblDBName, gbc);
         gbc.gridx = 1;
-        p2.add(txtDBName, gbc);
+        loginPanel2.add(txtDBName, gbc);
 
-        JPanel p3 = new JPanel();
-        p3.setLayout(new FlowLayout());
-        p3.add(btnLogin);
+        this.add(loginPanel2, BorderLayout.CENTER);
 
-        this.add(p1, BorderLayout.NORTH);
-        this.add(p2, BorderLayout.CENTER);
-        this.add(p3, BorderLayout.SOUTH);
+
+        // Login Panel3
+        JPanel loginPanel3 = new JPanel();
+        loginPanel3.setLayout(new FlowLayout());
+
+        // 확인 버튼
+        JButton btnLogin = new JButton("OK");
+        btnLogin.setFont(font1);
+        btnLogin.addActionListener(this);
+
+        loginPanel3.add(btnLogin);
+
+        this.add(loginPanel3, BorderLayout.SOUTH);
+
+
         this.setVisible(true);
     }
 
