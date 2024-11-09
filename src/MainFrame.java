@@ -547,7 +547,16 @@ public class MainFrame extends JFrame implements ActionListener {
 
                 // 설명: 사용자가 삭제하고자 하는 직원을 선택하고 삭제 버튼을 누르면 DB에서 삭제하는 로직 필요 -> 해당 로직을 여기에서 구현
 
-
+                // SQL DELETE 문 작성
+                String sql = "DELETE FROM EMPLOYEE WHERE Ssn = ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    // 선택된 모든 Ssn에 대해 삭제 실행
+                    for (String ssn : selectedSsnList) {
+                        pstmt.setString(1, ssn);
+                        pstmt.addBatch();
+                    }
+                    pstmt.executeBatch();
+                }
 
 
                 // ---------- 재혁님 영역 ----------
