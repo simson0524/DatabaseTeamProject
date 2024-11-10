@@ -558,6 +558,8 @@ public class MainFrame extends JFrame implements ActionListener {
                     pstmt.executeBatch();
                 }
 
+                // 이거 왜 안올라가냐..
+
 
                 // ---------- 재혁님 영역 ----------
                 conn.close();
