@@ -101,11 +101,10 @@ public class ManagerFrame extends JFrame implements ActionListener {
             }
 
             // 제약조건 설정
-            String constraintName = "salary_range";
-            String dropConstraintSQL = "ALTER TABLE EMPLOYEE DROP CONSTRAINT IF EXISTS " + constraintName;
+            String dropConstraintSQL = "ALTER TABLE EMPLOYEE MODIFY COLUMN Salary DECIMAL(10,2)";            
             String addConstraintSQL = String.format(
-                "ALTER TABLE EMPLOYEE ADD CONSTRAINT %s CHECK (Salary >= %d AND Salary <= %d)",
-                constraintName, intMinSalary, intMaxSalary);
+                "ALTER TABLE EMPLOYEE MODIFY COLUMN Salary DECIMAL(10,2) CHECK (Salary >= %d AND Salary <= %d)",
+                intMinSalary, intMaxSalary);
 
             try (Connection conn = DriverManager.getConnection(url, acct, pw);
                  Statement stmt = conn.createStatement()) {
