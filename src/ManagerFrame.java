@@ -100,16 +100,24 @@ public class ManagerFrame extends JFrame implements ActionListener {
                 return;
             }
 
-            // 제약조건 설정         
+            String constraintName = "salary_range";
+            String dropConstraintSQL = "ALTER TABLE EMPLOYEE DROP CHECK " + constraintName;
             String addConstraintSQL = String.format(
-                "ALTER TABLE EMPLOYEE MODIFY COLUMN Salary DECIMAL(10,2) CHECK (Salary >= %d AND Salary <= %d)",
-                intMinSalary, intMaxSalary);
+                "ALTER TABLE EMPLOYEE ADD CONSTRAINT %s CHECK (Salary >= %d AND Salary <= %d)",
+                constraintName, intMinSalary, intMaxSalary);
 
             try (Connection conn = DriverManager.getConnection(url, acct, pw);
-                 Statement stmt = conn.createStatement()) {
+                Statement stmt = conn.createStatement()) {
+
+                // 기존 제약조건을 삭제 시도 (제약조건이 없으면 에러 무시)
+                try {
+                    stmt.executeUpdate(dropConstraintSQL);
+                } catch (SQLException ex) {
+                    System.out.println("기존 제약조건이 없거나 삭제 중 오류 발생: " + ex.getMessage());
+                }
 
                 stmt.executeUpdate(addConstraintSQL);
-
+                
                 JOptionPane.showMessageDialog(this, "스키마 변경 성공!");
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "스키마 변경 실패.");
