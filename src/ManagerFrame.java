@@ -5,10 +5,12 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ManagerFrame extends JFrame implements ActionListener {
 
     private final JButton btnChangeSchema, btnNormal;
+    private final JTextField txtMinSalary, txtMaxSalary;
 
     // DB 정보 저장
     private final String url;
@@ -23,70 +25,51 @@ public class ManagerFrame extends JFrame implements ActionListener {
         this.setLayout(new BorderLayout(20, 20));
 
         Font font1 = new Font("Malgun Gothic", Font.BOLD, 18);
-        Font font2 = new Font("Malgun Gothic", Font.PLAIN, 18);
 
         // DB 정보 저장
         this.url = url;
         this.acct = acct;
         this.pw = pw;
 
-
-        // Login Panel1
-        JPanel loginPanel1 = new JPanel();
-        loginPanel1.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 20));
-
-        // title 명시
+        // Title Panel
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 20));
         JLabel lblTitle = new JLabel("스키마 변경 페이지");
         lblTitle.setFont(new Font("Malgun Gothic", Font.BOLD, 24));
+        titlePanel.add(lblTitle);
+        this.add(titlePanel, BorderLayout.NORTH);
 
-        loginPanel1.add(lblTitle);
+        // Salary 입력 패널
+        JPanel inputPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        JLabel lblMinSalary = new JLabel("최소 Salary:");
+        lblMinSalary.setFont(font1);
+        txtMinSalary = new JTextField(10);
+        txtMinSalary.setFont(font1);
 
-        this.add(loginPanel1, BorderLayout.NORTH);
+        JLabel lblMaxSalary = new JLabel("최대 Salary:");
+        lblMaxSalary.setFont(font1);
+        txtMaxSalary = new JTextField(10);
+        txtMaxSalary.setFont(font1);
 
+        inputPanel.add(lblMinSalary);
+        inputPanel.add(txtMinSalary);
+        inputPanel.add(lblMaxSalary);
+        inputPanel.add(txtMaxSalary);
 
-//        // Login Panel2
-//        JPanel loginPanel2 = new JPanel();
-//        loginPanel2.setLayout(new GridBagLayout());
-//
-//        // DB 계정
-//        JLabel lblMgrSsn = new JLabel("Mgr_ssn: ");
-//        lblMgrSsn.setFont(font1);
-//        this.txtMgrSsn = new JTextField(15);
-//        txtMgrSsn.setFont(font2);
-//
-//        // 간격 조정
-//        GridBagConstraints gbc = new GridBagConstraints();
-//        gbc.insets = new Insets(10, 10, 10, 10);
-//        gbc.anchor = GridBagConstraints.WEST;
-//
-//        gbc.gridx = 0;
-//        gbc.gridy = 0;
-//        loginPanel2.add(lblMgrSsn, gbc);
-//        gbc.gridx = 1;
-//        loginPanel2.add(txtMgrSsn, gbc);
-//
-//        this.add(loginPanel2, BorderLayout.CENTER);
+        this.add(inputPanel, BorderLayout.CENTER);
 
-
-        // Login Panel3
-        JPanel loginPanel3 = new JPanel();
-        loginPanel3.setLayout(new FlowLayout());
-
-        // 확인 버튼
-        this.btnChangeSchema = new JButton("스키마 변경");
+        // 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+        btnChangeSchema = new JButton("스키마 변경");
         btnChangeSchema.setFont(font1);
         btnChangeSchema.addActionListener(this);
+        buttonPanel.add(btnChangeSchema);
 
-        loginPanel3.add(btnChangeSchema);
-
-        this.btnNormal = new JButton("일반 사용자");
+        btnNormal = new JButton("일반 사용자");
         btnNormal.setFont(font1);
         btnNormal.addActionListener(this);
+        buttonPanel.add(btnNormal);
 
-        loginPanel3.add(btnNormal);
-
-        this.add(loginPanel3, BorderLayout.SOUTH);
-
+        this.add(buttonPanel, BorderLayout.SOUTH);
 
         this.setVisible(true);
     }
@@ -94,12 +77,48 @@ public class ManagerFrame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnChangeSchema) {
-            try (Connection conn = DriverManager.getConnection(url, acct, pw)) {
+            String minSalary = txtMinSalary.getText();
+            String maxSalary = txtMaxSalary.getText();
 
-                conn.close();
+            // 최소, 최대값 검증
+            if (minSalary.isEmpty() || maxSalary.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Salary의 최소, 최대값을 모두 입력해주세요.");
+                return;
+            }
+
+            int intMinSalary, intMaxSalary;
+            try {
+                intMinSalary = Integer.parseInt(minSalary);
+                intMaxSalary = Integer.parseInt(maxSalary);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "입력값은 숫자여야 합니다.");
+                return;
+            }
+
+            if (intMinSalary > intMaxSalary) {
+                JOptionPane.showMessageDialog(this, "최소값은 최대값보다 클 수 없습니다.");
+                return;
+            }
+
+            String constraintName = "salary_range";
+            String dropConstraintSQL = "ALTER TABLE EMPLOYEE DROP CHECK " + constraintName;
+            String addConstraintSQL = String.format(
+                "ALTER TABLE EMPLOYEE ADD CONSTRAINT %s CHECK (Salary >= %d AND Salary <= %d)",
+                constraintName, intMinSalary, intMaxSalary);
+
+            try (Connection conn = DriverManager.getConnection(url, acct, pw);
+                Statement stmt = conn.createStatement()) {
+
+                // 기존 제약조건을 삭제 시도 (제약조건이 없으면 에러 무시)
+                try {
+                    stmt.executeUpdate(dropConstraintSQL);
+                } catch (SQLException ex) {
+                    System.out.println("기존 제약조건이 없거나 삭제 중 오류 발생: " + ex.getMessage());
+                }
+
+                stmt.executeUpdate(addConstraintSQL);
+                
                 JOptionPane.showMessageDialog(this, "스키마 변경 성공!");
-                new ManagerFrame(url, acct, pw);
-                this.setVisible(false);
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "스키마 변경 실패.");
             }
@@ -109,6 +128,5 @@ public class ManagerFrame extends JFrame implements ActionListener {
             new MainFrame(url, acct, pw);
             this.setVisible(false);
         }
-
     }
 }
